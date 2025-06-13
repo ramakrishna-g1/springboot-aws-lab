@@ -47,26 +47,4 @@ public class S3UploadApplication {
                 .credentialsProvider(awsCredentialsProvider1)
                 .region(Region.of(aws_region)).build();
     }
-
-//    @Bean("s3AsyncClient")
-//    public S3AsyncClient getS3AsyncClient() {
-//        AwsCredentialsProvider awsCredentials = StaticCredentialsProvider
-//                .create(AwsBasicCredentials.create(awsAccessKey, awsSecretKey));
-//
-//        S3CrtHttpConfiguration s3CrtHttpConfiguration =
-//                S3CrtHttpConfiguration.builder()
-//                        .connectionTimeout(Duration.of(10, ChronoUnit.SECONDS))
-//                        .build();
-//
-//        return S3AsyncClient.crtBuilder()
-//                .region(Region.of(aws_region))
-//                .credentialsProvider(awsCredentials)
-//                .minimumPartSizeInBytes(minimumPartSizeInMB * 1024 * 1024)
-//                .httpConfiguration(s3CrtHttpConfiguration)
-//                .targetThroughputInGbps(targetThroughputInGbps)
-//                .maxConcurrency(maxConcurrency)
-//                .build();
-//    }
-
-
 }

@@ -23,6 +23,7 @@ import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.BlockingInputStreamAsyncRequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.crt.S3CrtHttpConfiguration;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.Upload;
 
@@ -30,12 +31,19 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Upload Stream to S3 using {@link S3TransferManager} and {@link S3AsyncClient}.
+ * Custom {@link ThreadPoolExecutor} is used to upload configured number of streams in parallel.
+ * <br>
+ * NOTE: Record tracking in DB is not done for this class.
+ */
 @Service
 public class UploadStreamV1Service {
 
@@ -64,10 +72,10 @@ public class UploadStreamV1Service {
     @Value("${aws_region}")
     private String aws_region;
 
-    @Value("${corePoolSize}")
+    @Value("${corePoolSize:1}")
     private int corePoolSize;
 
-    @Value("${maximumPoolSize}")
+    @Value("${maximumPoolSize:5}")
     private int maximumPoolSize;
 
     @Value("${targetThroughputInGbps}")
@@ -76,49 +84,10 @@ public class UploadStreamV1Service {
     @Value("${maxConcurrency}")
     private int maxConcurrency;
 
-    @Value("${minimumPartSizeInBytes}")
-    private long minimumPartSizeInBytes;
-
-    @Autowired
-    UploadFilesService uploadFilesService;
-
-    @Autowired
-    StreamFilesRepository streamFilesRepository;
+    @Value("${minimumPartSizeInMB:10}")
+    private long minimumPartSizeInMB;
 
     private RestTemplate restTemplate = new RestTemplate();
-
-    /**
-     * This method will get the list of FileMetaData (StreamFileDTO) from the base URL of BSSH API.
-     *
-     * @return List<StreamFileDTO> it contains the list of the File Metadata provided by BaseSpace API
-     */
-    public List<StreamFileDTO> getFileMetadata(String runId) {
-
-        logger.info("targetThroughputInGbps= {}", targetThroughputInGbps);
-        logger.info("maxConcurrency= {}", maxConcurrency);
-        logger.info("minimumPartSizeInBytes= {}", minimumPartSizeInBytes);
-        logger.info("corePoolSize= {}", corePoolSize);
-        logger.info("maximumPoolSize= {}", maximumPoolSize);
-
-        List<StreamFileDTO> responseItems = Collections.emptyList();
-        List<UploadStreamTracker> uploadStreamTrackerList = Collections.emptyList();
-
-        logger.info("Invoking BSSH api to fetch file(s) metadata to upload");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(bearerToken);
-        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-
-        ResponseEntity<String> result = restTemplate.exchange(baseURL.replace(runIdAPIPlaceHolder, runId), HttpMethod.GET, requestEntity, String.class);
-        if (result != null && !StringUtils.isEmpty(result.getBody())) {
-            Gson gson = new Gson();
-            ResponseDTO responseDTO = gson.fromJson(result.getBody(), ResponseDTO.class);
-            logger.info("Files Count :{}", responseDTO.getItems().size());
-            responseItems = responseDTO.getItems();
-        }
-
-        return responseItems;
-    }
 
     /**
      * This method will upload the stream of the file to the S3
@@ -131,7 +100,7 @@ public class UploadStreamV1Service {
         String response = null;
 
         try (S3TransferManager transferManager = getTransferManager()) {
-            for(String runId: runIdList) {
+            for (String runId : runIdList) {
                 List<StreamFileDTO> streamFileDTOList = getFileMetadata(runId);
 
                 if (!CollectionUtils.isEmpty(streamFileDTOList)) {
@@ -140,8 +109,6 @@ public class UploadStreamV1Service {
                     AtomicInteger completedFiles = new AtomicInteger(0);
                     final int numberOfFiles = streamFileDTOList.size();
 
-                    int corePoolSize = this.corePoolSize;
-                    int maximumPoolSize = this.maximumPoolSize;
                     logger.info("corePoolSize for executor: {}", corePoolSize);
                     logger.info("maximumPoolSize for executor: {}", maximumPoolSize);
                     BlockingQueue<Runnable> workingQueue = new LinkedBlockingQueue<>();
@@ -166,7 +133,7 @@ public class UploadStreamV1Service {
                                     logger.debug("Created HTTP request for: {}", file.getPath());
 
                                     if (urlConnection.getResponseCode() == HttpStatus.OK.value()) {
-                                        BlockingInputStreamAsyncRequestBody body = AsyncRequestBody.forBlockingInputStream(null);
+                                        BlockingInputStreamAsyncRequestBody body = AsyncRequestBody.forBlockingInputStream(file.getSize());
 
                                         Upload upload = transferManager.upload(builder -> builder
                                                 .requestBody(body)
@@ -174,7 +141,7 @@ public class UploadStreamV1Service {
                                                 .putObjectRequest(req -> req.bucket(s3BucketName).key("V1_POC3/" + s3Key + "/" + file.getPath()))
                                                 .build());
 
-                                        long totalBytes = body.writeInputStream(urlConnection.getInputStream());
+                                        body.writeInputStream(urlConnection.getInputStream());
 
                                         urlConnection.getInputStream().close();
                                         urlConnection.disconnect();
@@ -215,6 +182,38 @@ public class UploadStreamV1Service {
 
 
     /**
+     * This method will get the list of FileMetaData (StreamFileDTO) from the base URL of BSSH API.
+     *
+     * @return List<StreamFileDTO> it contains the list of the File Metadata provided by BaseSpace API
+     */
+    public List<StreamFileDTO> getFileMetadata(String runId) {
+
+        logger.info("targetThroughputInGbps= {}", targetThroughputInGbps);
+        logger.info("maxConcurrency= {}", maxConcurrency);
+        logger.info("minimumPartSizeInBytes= {}", minimumPartSizeInMB);
+        logger.info("corePoolSize= {}", corePoolSize);
+        logger.info("maximumPoolSize= {}", maximumPoolSize);
+
+        List<StreamFileDTO> responseItems = Collections.emptyList();
+
+        logger.info("Invoking BSSH api to fetch file(s) metadata to upload");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(bearerToken);
+        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> result = restTemplate.exchange(baseURL.replace(runIdAPIPlaceHolder, runId), HttpMethod.GET, requestEntity, String.class);
+        if (result != null && !StringUtils.isEmpty(result.getBody())) {
+            Gson gson = new Gson();
+            ResponseDTO responseDTO = gson.fromJson(result.getBody(), ResponseDTO.class);
+            responseItems = responseDTO.getItems();
+            logger.info("Files Count :{}", responseItems.size());
+        }
+
+        return responseItems;
+    }
+
+    /**
      * @return S3TransferManager
      */
     public S3TransferManager getTransferManager() {
@@ -234,12 +233,18 @@ public class UploadStreamV1Service {
         AwsCredentialsProvider awsCredentials = StaticCredentialsProvider
                 .create(AwsBasicCredentials.create(awsAccessKey, awsSecretKey));
 
+        S3CrtHttpConfiguration s3CrtHttpConfiguration =
+                S3CrtHttpConfiguration.builder()
+                        .connectionTimeout(Duration.ofSeconds(30))
+                        .build();
+
         return S3AsyncClient.crtBuilder()
                 .region(Region.of(aws_region))
                 .credentialsProvider(awsCredentials)
-                .minimumPartSizeInBytes(minimumPartSizeInBytes * 1024 * 1024)
+                .minimumPartSizeInBytes(minimumPartSizeInMB * 1024 * 1024)
                 .targetThroughputInGbps(targetThroughputInGbps)
                 .maxConcurrency(maxConcurrency)
+                .httpConfiguration(s3CrtHttpConfiguration)
                 .build();
     }
 

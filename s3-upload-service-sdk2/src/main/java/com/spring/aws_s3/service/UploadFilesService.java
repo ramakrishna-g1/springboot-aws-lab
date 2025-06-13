@@ -71,8 +71,8 @@ public class UploadFilesService {
     @Value("${targetThroughputInGbps:20}")
     private Double targetThroughputInGbps;
 
-    @Value("${minimumPartSizeInBytes:10}")
-    private Long minimumPartSizeInBytes;
+    @Value("${minimumPartSizeInMB:10}")
+    private Long minimumPartSizeInMB;
 
     @Value("${maxConcurrency:50}")
     private int maxConcurrency;
@@ -94,10 +94,13 @@ public class UploadFilesService {
 
         try {
             List<File> allowedFilesToBeUploaded = new ArrayList<>(0);
-            allowedFilesToBeUploaded = populateAllowedFiles(new File(sourceDirectory), allowedFilesToBeUploaded);
+            populateAllowedFiles(new File(sourceDirectory), allowedFilesToBeUploaded);
 
             if (!CollectionUtils.isEmpty(allowedFilesToBeUploaded)) {
                 logger.info("File count in given directory: " + allowedFilesToBeUploaded.size());
+
+                // Setting thread Name
+                Thread.currentThread().setName("UploadData");
 
                 transferManager = getTransferManager();
 
@@ -132,13 +135,6 @@ public class UploadFilesService {
      * @return S3TransferManager
      */
     public S3TransferManager getTransferManager() {
-        // Setting thread Name
-        Thread.currentThread().setName("UploadData");
-        ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
-        int numberOfThreads = currentGroup.activeCount();
-        Thread[] lstThreads2 = new Thread[numberOfThreads];
-        currentGroup.enumerate(lstThreads2);
-
         return S3TransferManager.builder()
                 .s3Client(getS3AsyncClient())
                 .executor(createExecutorService(executorThreadSize, Thread.currentThread().getName() + "_slave"))
@@ -152,19 +148,19 @@ public class UploadFilesService {
         return S3AsyncClient.crtBuilder()
                 .region(Region.of(aws_region))
                 .credentialsProvider(awsCredentials)
-                .minimumPartSizeInBytes(minimumPartSizeInBytes * MB)
+                .minimumPartSizeInBytes(minimumPartSizeInMB * MB)
                 .targetThroughputInGbps(targetThroughputInGbps)
                 .maxConcurrency(maxConcurrency)
                 .build();
     }
 
     /**
-     * This method is used to load the files from the configured directory
+     * This method is used to load the files from the configured directory on the disk
      *
      * @param directory            The File object of source directory from where files are to be picked
      * @param allowedFilesToUpload List of the allowed files that are to be uploaded
      */
-    private List<File> populateAllowedFiles(File directory, List<File> allowedFilesToUpload) {
+    private void populateAllowedFiles(File directory, List<File> allowedFilesToUpload) {
 
         File[] listOfFileInDir = directory.listFiles();
 
@@ -189,7 +185,6 @@ public class UploadFilesService {
                 }
             }
         }
-        return allowedFilesToUpload;
     }
 
     /**
@@ -236,6 +231,7 @@ public class UploadFilesService {
                         .addTransferListener(UploadProcessListener.create(file.getName()))
                         .source(Paths.get(file.getPath()))
                         .build();
+
                 fileUploadDTO.setFileRequest(uploadFileRequest);
 
                 uploadFileToS3AndUpdateStatus(file, fileUploadDTO, allUploadTrackerList, retriesDone);
@@ -266,7 +262,7 @@ public class UploadFilesService {
      * @param retriesDone          This is the retryCount
      */
     public void uploadFileToS3AndUpdateStatus(File file, FileUploadDTO fileUploadDTO,
-                                              List<UploadTracker> allUploadTrackerList, int retriesDone) throws Exception {
+                                              List<UploadTracker> allUploadTrackerList, int retriesDone) {
 
         S3TransferManager transferManager = fileUploadDTO.getTransferManager();
         UploadFileRequest uploadFileRequest = fileUploadDTO.getFileRequest();

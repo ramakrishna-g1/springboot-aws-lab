@@ -28,6 +28,7 @@ import java.net.SocketTimeoutException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -87,14 +88,17 @@ public class UploadDirectoryService {
      */
     public String uploadDirectoryToS3() {
         List<UploadTracker> allUploadTrackerList = null;
-        String uploadRespo = null;
+        String uploadResponse = null;
         S3TransferManager transferManager = null;
 
         try {
             List<File> allowedFilesToBeUploaded = new ArrayList<>();
             populateAllowedFilesToS3Bucket(new File(sourceDirectory), allowedFilesToBeUploaded);
 
-            logger.info("files found in given directory: {}", allowedFilesToBeUploaded);
+            logger.info("total files found in given directory: {}", allowedFilesToBeUploaded.size());
+
+            // Setting thread Name
+            Thread.currentThread().setName("UploadData");
 
             transferManager = getTransferManager();
             logger.info("created TransferManager object");
@@ -107,28 +111,20 @@ public class UploadDirectoryService {
             uploadTrackerRepo.saveAllAndFlush(allUploadTrackerList);
 
             transferFilesToS3UsingDirectoryUpload(allowedFilesToBeUploaded, fileUploadDTO, allUploadTrackerList);
-            uploadRespo = "Upload initiated successfully";
+            uploadResponse = "Upload initiated successfully";
 
-            transferManager.close();
         } catch (Exception e) {
             logger.error("exception occurred: {}", e.getMessage());
+            uploadResponse = "Exception occurred, upload Failed";
+        } finally {
             if (!ObjectUtils.isEmpty(transferManager)) {
                 transferManager.close();
             }
-            uploadRespo = "Exception occurred, upload Failed";
         }
-        return uploadRespo;
+        return uploadResponse;
     }
 
     private S3TransferManager getTransferManager() {
-        // Setting thread Name
-        String currThreadName = "UploadData";
-        Thread.currentThread().setName(currThreadName);
-        ThreadGroup currentGroup2 = Thread.currentThread().getThreadGroup();
-        int noThreads2 = currentGroup2.activeCount();
-        Thread[] lstThreads2 = new Thread[noThreads2];
-        currentGroup2.enumerate(lstThreads2);
-
         return S3TransferManager.builder()
                 .s3Client(getS3AsyncClient())
                 .executor(createExecutorService(executorThreadSize, Thread.currentThread().getName() + "_slave"))
@@ -156,7 +152,7 @@ public class UploadDirectoryService {
     private void populateAllowedFilesToS3Bucket(File directory, List<File> allowedFilesToUpload) {
         logger.info("source directory exists: {}, readable: {}, writable: {}", directory.exists(), directory.canRead(), directory.canWrite());
         File[] listOfFileInDir = directory.listFiles();
-        logger.info("list of files: {}", listOfFileInDir);
+        logger.info("list of files: {}", Arrays.toString(listOfFileInDir));
 
         if (listOfFileInDir != null) {
             for (File file : listOfFileInDir) {
@@ -183,10 +179,9 @@ public class UploadDirectoryService {
     }
 
     /**
-     * This method is to upload the files to the S3 Bucket using batch process
-     * depending on number of files to be uploaded. After uploading it will update
-     * the status of that file accordingly before and after completion of Upload in
-     * DB
+     * This method is to upload the files to the S3 Bucket using DirectoryUpload.
+     * After uploading it will update the status of that file accordingly before
+     * and after completion of Upload in DB
      *
      * @param allowedFilesToBeUploaded List of files that are to be uploaded
      * @param fileUploadDTO            For setting the FileUploadRequest object to use in upcoming methods
@@ -226,10 +221,11 @@ public class UploadDirectoryService {
     }
 
     /**
-     * This method will upload a particular file into S3 Bucket and updated db status to completed or failed,
-     * it will also update the retriesDone column in the table accordingly.
+     * This method will upload a particular file into S3 Bucket and
+     * updates db status to completed or failed, it will also update
+     * the retriesDone column in the table based on retries done for failed files.
      *
-     * @param fileUploadDTO        To get the S3TransferManager, and UploadDirectoryRequest
+     * @param fileUploadDTO        To get the S3TransferManager and UploadDirectoryRequest
      * @param allUploadTrackerList List of all UploadTrackers for updating Completed Status in DB for Files
      * @param retriesDone          Count of the retries Done for the File
      * @throws Exception Throws Exception if Upload fails due to any exception

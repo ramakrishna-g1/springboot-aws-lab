@@ -31,8 +31,8 @@ public class S3AsyncClientConfiguration {
     @Value("${targetThroughputInGbps}")
     private double targetThroughputInGbps;
 
-    @Value("${minimumPartSizeInBytes}")
-    private long minimumPartSizeInBytes;
+    @Value("${minimumPartSizeInMB:10}")
+    private long minimumPartSizeInMB;
 
     @Bean
     public S3AsyncClient s3AsyncClient() {
@@ -47,7 +47,7 @@ public class S3AsyncClientConfiguration {
         return S3AsyncClient.crtBuilder()
                 .region(Region.of(aws_region))
                 .credentialsProvider(awsCredentials)
-                .minimumPartSizeInBytes(minimumPartSizeInBytes * 1024 * 1024)
+                .minimumPartSizeInBytes(minimumPartSizeInMB * 1024 * 1024)
                 .httpConfiguration(s3CrtHttpConfiguration)
                 .targetThroughputInGbps(targetThroughputInGbps)
                 .maxConcurrency(maxConcurrency)
