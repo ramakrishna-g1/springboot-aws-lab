@@ -124,10 +124,6 @@ public class UploadDirectoryService {
         // Setting thread Name
         String currThreadName = "UploadData";
         Thread.currentThread().setName(currThreadName);
-        ThreadGroup currentGroup2 = Thread.currentThread().getThreadGroup();
-        int noThreads2 = currentGroup2.activeCount();
-        Thread[] lstThreads2 = new Thread[noThreads2];
-        currentGroup2.enumerate(lstThreads2);
 
         return S3TransferManager.builder()
                 .s3Client(getS3AsyncClient())
@@ -183,11 +179,6 @@ public class UploadDirectoryService {
     }
 
     /**
-     * This method is to upload the files to the S3 Bucket using batch process
-     * depending on number of files to be uploaded. After uploading it will update
-     * the status of that file accordingly before and after completion of Upload in
-     * DB
-     *
      * @param allowedFilesToBeUploaded List of files that are to be uploaded
      * @param fileUploadDTO            For setting the FileUploadRequest object to use in upcoming methods
      * @param allUploadTrackerList     List of all DB trackers, using which we will be updating the DB with InProgress Status
