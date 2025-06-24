@@ -41,8 +41,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Upload Stream to S3 using {@link S3TransferManager} and {@link S3AsyncClient}.
  * Custom {@link ThreadPoolExecutor} is used to upload configured number of streams in parallel.
- * <br>
- * NOTE: Record tracking in DB is not done for this class.
+ *
+ * @implNote Record tracking in DB is not done in this class.
  */
 @Service
 public class UploadStreamV1Service {

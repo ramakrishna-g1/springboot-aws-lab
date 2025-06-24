@@ -35,6 +35,12 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
+/**
+ * Upload files from Local disk to S3, using {@link S3TransferManager#uploadDirectory(UploadDirectoryRequest)}
+ *
+ * @implNote Upload status is tracked in DB and
+ * configured number of retries are done for failed uploads.
+ */
 @Service
 public class UploadDirectoryService {
 
