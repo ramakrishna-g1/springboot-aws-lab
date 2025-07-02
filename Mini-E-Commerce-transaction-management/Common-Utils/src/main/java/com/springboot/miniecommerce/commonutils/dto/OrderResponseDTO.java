@@ -30,6 +30,9 @@ public class OrderResponseDTO {
         this.quantity = quantity;
     }
 
+    public OrderResponseDTO() {
+    }
+
     public OrderResponseDTO(Long orderId, Long productId, Integer quantity) {
         this.orderId = orderId;
         this.productId = productId;

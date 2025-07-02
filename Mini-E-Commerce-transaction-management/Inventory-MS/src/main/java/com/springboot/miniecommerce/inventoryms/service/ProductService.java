@@ -47,6 +47,8 @@ public class ProductService {
 
         if (product.getAvailableQuantity() < inventoryRequestDTO.getQuantity()) {
             log.error("Order placed for more quantity than available");
+            ApiResponseDTO<Void> apiResponse = new ApiResponseDTO<>(InventoryUpdateStatus.FAILED.toString(), "Order placed for more quantity than available");
+            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
         }
         product.setAvailableQuantity(product.getAvailableQuantity() - inventoryRequestDTO.getQuantity());
         double orderPrice = product.getPrice() * inventoryRequestDTO.getQuantity();

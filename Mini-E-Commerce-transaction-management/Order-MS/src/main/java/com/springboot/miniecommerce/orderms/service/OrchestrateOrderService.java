@@ -29,18 +29,17 @@ public class OrchestrateOrderService {
 
     private static final Logger log = LoggerFactory.getLogger(OrchestrateOrderService.class);
 
-    @Value("${service.inventory.base-url}")
-    private String inventoryServiceBaseUrl;
-
-    @Value("${service.payment.base-url}")
-    private String paymentServiceBaseUrl;
 
     private final OrderService orderService;
 
     private final RestClient inventoryRestClient;
     private final RestClient paymentRestClient;
 
-    public OrchestrateOrderService(OrderService orderService, RestClient.Builder restClientBuilder) {
+    public OrchestrateOrderService(OrderService orderService, RestClient.Builder restClientBuilder,
+                                   @Value("${service.inventory.base-url}") String inventoryServiceBaseUrl,
+                                   @Value("${service.payment.base-url}") String paymentServiceBaseUrl) {
+
+        log.info("inventoryServiceBaseUrl:{} paymentServiceBaseUrl:{}", inventoryServiceBaseUrl, paymentServiceBaseUrl);
         this.inventoryRestClient = restClientBuilder.baseUrl(inventoryServiceBaseUrl).build();
         this.paymentRestClient = restClientBuilder.baseUrl(paymentServiceBaseUrl).build();
         this.orderService = orderService;
@@ -60,21 +59,23 @@ public class OrchestrateOrderService {
             InventoryRequestDTO inventoryRequestDTO = new InventoryRequestDTO(orderResponseDTO.getProductId(), orderResponseDTO.getQuantity());
 
             log.info("Calling Inventory service");
-            ResponseEntity<ApiResponseDTO<InventoryResponseDTO>> inventoryResponse = this.inventoryRestClient
-                    .patch()
-                    .uri("/{id}", orderResponseDTO.getProductId())
-                    .body(inventoryRequestDTO)
-                    .exchange((request, response) -> {
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        try (InputStream bodyStream = response.getBody()) {
-                            ApiResponseDTO<InventoryResponseDTO> apiResponse =
-                                    objectMapper.readValue(bodyStream, new TypeReference<ApiResponseDTO<InventoryResponseDTO>>() {
-                                    });
-                            return new ResponseEntity<>(apiResponse, response.getStatusCode());
-                        } catch (IOException exception) {
-                            throw new InventoryUpdateFailedException(response.getStatusCode().value(), InventoryUpdateStatus.FAILED.toString(), "Exception while reading response from Inventory API");
-                        }
-                    });
+            ResponseEntity<ApiResponseDTO<InventoryResponseDTO>> inventoryResponse =
+                    this.inventoryRestClient
+                            .patch()
+                            .uri("/{id}", orderResponseDTO.getProductId())
+                            .body(inventoryRequestDTO)
+                            .exchange((request, response) -> {
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                try (InputStream bodyStream = response.getBody()) {
+                                    ApiResponseDTO<InventoryResponseDTO> apiResponse =
+                                            objectMapper.readValue(bodyStream, new TypeReference<ApiResponseDTO<InventoryResponseDTO>>() {
+                                            });
+                                    return new ResponseEntity<>(apiResponse, response.getStatusCode());
+                                } catch (IOException exception) {
+                                    log.error("Exception in parsing inventory response",exception);
+                                    throw new InventoryUpdateFailedException(response.getStatusCode().value(), InventoryUpdateStatus.FAILED.toString(), "Exception while reading response from Inventory API");
+                                }
+                            });
 
             if (Objects.isNull(inventoryResponse) || !inventoryResponse.hasBody()) {
                 return new ResponseEntity<>("Inventory response body is null", HttpStatus.INTERNAL_SERVER_ERROR); //TODO revert order creation
@@ -86,21 +87,22 @@ public class OrchestrateOrderService {
                 PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO(orderResponseDTO.getOrderId(), inventoryResponseDTO.getAmount());
 
                 log.info("Calling Payments service");
-                ResponseEntity<ApiResponseDTO<PaymentResponseDTO>> paymentResponse = this.paymentRestClient
-                        .post()
-                        .uri("")
-                        .body(paymentRequestDTO)
-                        .exchange((request, response) -> {
-                            ObjectMapper objectMapper = new ObjectMapper();
-                            try (InputStream bodyStream = response.getBody()) {
-                                ApiResponseDTO<PaymentResponseDTO> apiResponse =
-                                        objectMapper.readValue(bodyStream, new TypeReference<ApiResponseDTO<PaymentResponseDTO>>() {
-                                        });
-                                return new ResponseEntity<>(apiResponse, response.getStatusCode());
-                            } catch (IOException exception) {
-                                throw new PaymentFailedException(response.getStatusCode().value(), PaymentStatus.FAILED.toString(), "Exception while reading response from Payment API");
-                            }
-                        });
+                ResponseEntity<ApiResponseDTO<PaymentResponseDTO>> paymentResponse =
+                        this.paymentRestClient
+                                .post()
+                                .uri("")
+                                .body(paymentRequestDTO)
+                                .exchange((request, response) -> {
+                                    ObjectMapper objectMapper = new ObjectMapper();
+                                    try (InputStream bodyStream = response.getBody()) {
+                                        ApiResponseDTO<PaymentResponseDTO> apiResponse =
+                                                objectMapper.readValue(bodyStream, new TypeReference<ApiResponseDTO<PaymentResponseDTO>>() {
+                                                });
+                                        return new ResponseEntity<>(apiResponse, response.getStatusCode());
+                                    } catch (IOException exception) {
+                                        throw new PaymentFailedException(response.getStatusCode().value(), PaymentStatus.FAILED.toString(), "Exception while reading response from Payment API");
+                                    }
+                                });
 
                 if (Objects.isNull(paymentResponse) || !paymentResponse.hasBody()) {
                     return new ResponseEntity<>("Payment response body is null", HttpStatus.INTERNAL_SERVER_ERROR); //TODO revert order creation
@@ -123,7 +125,7 @@ public class OrchestrateOrderService {
                 }
             } else {
                 //TODO handle exception from inventory service
-                log.error("Exception while updating inventory");
+                log.error("Exception while updating inventory:{}", inventoryResponse.getBody());
             }
         } else {
             //TODO handle exception from order service

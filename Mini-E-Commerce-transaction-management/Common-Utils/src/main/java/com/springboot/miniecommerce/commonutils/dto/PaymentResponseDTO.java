@@ -4,8 +4,6 @@ public class PaymentResponseDTO {
 
     private Long paymentId;
     private Double totalAmount;
-    private String status;
-    private String message;
 
     public Long getPaymentId() {
         return paymentId;
@@ -23,20 +21,12 @@ public class PaymentResponseDTO {
         this.totalAmount = totalAmount;
     }
 
-    public String getStatus() {
-        return status;
+    public PaymentResponseDTO() {
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public PaymentResponseDTO(Long paymentId, Double totalAmount) {
+        this.paymentId = paymentId;
+        this.totalAmount = totalAmount;
     }
 
     @Override
@@ -44,8 +34,6 @@ public class PaymentResponseDTO {
         return "PaymentResponseDTO{" +
                 "paymentId=" + paymentId +
                 ", totalAmount=" + totalAmount +
-                ", status='" + status + '\'' +
-                ", message='" + message + '\'' +
                 '}';
     }
 }

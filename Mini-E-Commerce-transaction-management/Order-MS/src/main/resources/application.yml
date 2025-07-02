@@ -1,6 +1,5 @@
 server:
   port: 9091
-
 spring:
   application:
     name: Mini-E-Commerce-Order-MS
@@ -17,9 +16,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  data:
+    jdbc:
+      dialect: postgresql
 
 service:
   inventory:
     base-url: "http://localhost:9092/api/inventory"
   payment:
-    base-url: "http://localhost:9092/api/payment"
+    base-url: "http://localhost:9093/api/payment"

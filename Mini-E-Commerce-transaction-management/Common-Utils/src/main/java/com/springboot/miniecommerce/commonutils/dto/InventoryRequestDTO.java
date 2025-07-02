@@ -26,6 +26,8 @@ public class InventoryRequestDTO {
         this.quantity = quantity;
     }
 
+
+
     @Override
     public String toString() {
         return "InventoryRequestDTO{" +

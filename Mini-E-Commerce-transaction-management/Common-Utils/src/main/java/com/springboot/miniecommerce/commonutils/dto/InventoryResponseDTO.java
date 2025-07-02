@@ -26,6 +26,9 @@ public class InventoryResponseDTO {
         this.amount = amount;
     }
 
+    public InventoryResponseDTO() {
+    }
+
     @Override
     public String toString() {
         return "InventoryResponseDTO{" +
