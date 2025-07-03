@@ -1,7 +1,7 @@
 package com.springboot.miniecommerce.orderms.service;
 
 import com.springboot.miniecommerce.commonutils.constant.OrderStatus;
-import com.springboot.miniecommerce.commonutils.dto.ApiResponseDTO;
+import com.springboot.miniecommerce.commonutils.dto.ErrorDTO;
 import com.springboot.miniecommerce.commonutils.dto.OrderResponseDTO;
 import com.springboot.miniecommerce.commonutils.dto.OrderUpdateRequestDTO;
 import com.springboot.miniecommerce.orderms.model.Order;
@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class OrderService {
@@ -24,9 +26,9 @@ public class OrderService {
         this.orderRepository = orderRepository;
     }
 
-    public ResponseEntity<ApiResponseDTO<?>> createOrder(Order order) {
+    public ResponseEntity<?> createOrder(Order order) {
         if (order.getProductId() == null || order.getProductId() == 0) {
-            ApiResponseDTO<Void> apiResponse = new ApiResponseDTO<>(OrderStatus.FAILED.toString(), "Order creation failed, product Id is null");
+            ErrorDTO apiResponse = new ErrorDTO(HttpStatus.BAD_REQUEST.value(), OrderStatus.FAILED.toString(), "Order creation failed, product Id is null", LocalDateTime.now().toString());
             return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
         }
 
@@ -35,21 +37,25 @@ public class OrderService {
         log.info("Order saved successfully with id:{}", order.getOrderId());
 
         OrderResponseDTO orderResponseDTO = new OrderResponseDTO(order.getOrderId(), order.getProductId(), order.getQuantity());
-        ApiResponseDTO<OrderResponseDTO> apiResponse = new ApiResponseDTO<>(OrderStatus.INITIATED.toString(), "Order initiated successfully", orderResponseDTO);
-
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(orderResponseDTO, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<ApiResponseDTO<?>> updateOrderStatus(OrderUpdateRequestDTO orderUpdateRequestDTO) {
+    public ResponseEntity<?> updateOrderStatus(OrderUpdateRequestDTO orderUpdateRequestDTO) {
         if (orderUpdateRequestDTO.getOrderId() == null || orderUpdateRequestDTO.getOrderId() == 0) {
-            ApiResponseDTO<Void> apiResponse = new ApiResponseDTO<>(OrderStatus.FAILED.toString(), "Order update failed, order id is null");
-            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+            log.error("Order update failed, order id is null or 0");
+            ErrorDTO error = new ErrorDTO(HttpStatus.BAD_REQUEST.value(), OrderStatus.FAILED.toString(), "Order update failed, order id cannot be null or 0", LocalDateTime.now().toString());
+            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
         }
 
-        int numberOfUpdates = orderRepository.updateOrderStatusByOrderId(orderUpdateRequestDTO.getOrderStatus().toString(), orderUpdateRequestDTO.getOrderId());
+        if (orderUpdateRequestDTO.getOrderStatus() == null) {
+            log.error("Order update failed, orderStatus is null");
+            ErrorDTO error = new ErrorDTO(HttpStatus.BAD_REQUEST.value(), OrderStatus.FAILED.toString(), "Order update failed, order status cannot be null", LocalDateTime.now().toString());
+            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        }
+
+        int numberOfUpdates = orderRepository.updateOrderStatusAndModificationReasonByOrderId(orderUpdateRequestDTO.getOrderStatus().toString(), orderUpdateRequestDTO.getModificationReason().toString() ,orderUpdateRequestDTO.getOrderId());
         log.info("Updated order status to:{} of {} records", numberOfUpdates, orderUpdateRequestDTO.getOrderStatus());
 
-        ApiResponseDTO<OrderUpdateRequestDTO> apiResponse = new ApiResponseDTO<>(OrderStatus.UPDATED.toString(), "Order updated successfully", orderUpdateRequestDTO);
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        return new ResponseEntity<>(OrderStatus.UPDATED, HttpStatus.OK);
     }
 }

@@ -2,12 +2,22 @@ package com.springboot.miniecommerce.commonutils.dto;
 
 public class InventoryRequestDTO {
 
+    private Long orderId;
     private Long productId;
-    private Integer quantity;
+    private Integer requestedQuantity;
 
-    public InventoryRequestDTO(Long productId, Integer quantity) {
+    public InventoryRequestDTO(Long orderId, Long productId, Integer requestedQuantity) {
+        this.orderId = orderId;
         this.productId = productId;
-        this.quantity = quantity;
+        this.requestedQuantity = requestedQuantity;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
     public Long getProductId() {
@@ -18,21 +28,20 @@ public class InventoryRequestDTO {
         this.productId = productId;
     }
 
-    public Integer getQuantity() {
-        return quantity;
+    public Integer getRequestedQuantity() {
+        return requestedQuantity;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void setRequestedQuantity(Integer requestedQuantity) {
+        this.requestedQuantity = requestedQuantity;
     }
-
-
 
     @Override
     public String toString() {
         return "InventoryRequestDTO{" +
-                "productId=" + productId +
-                ", quantity=" + quantity +
+                "orderId=" + orderId +
+                ", productId=" + productId +
+                ", quantity=" + requestedQuantity +
                 '}';
     }
 }

@@ -1,6 +1,6 @@
 package com.springboot.miniecommerce.paymentms.controller;
 
-import com.springboot.miniecommerce.commonutils.dto.ApiResponseDTO;
+import com.springboot.miniecommerce.commonutils.dto.ErrorDTO;
 import com.springboot.miniecommerce.commonutils.dto.PaymentRequestDTO;
 import com.springboot.miniecommerce.paymentms.service.PaymentService;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class PaymentController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponseDTO<?>> doPaymentForOrder(@RequestBody PaymentRequestDTO paymentRequestDTO){
+    public ResponseEntity<?> doPaymentForOrder(@RequestBody PaymentRequestDTO paymentRequestDTO){
         return paymentService.doPaymentForOrder(paymentRequestDTO);
     }
 }

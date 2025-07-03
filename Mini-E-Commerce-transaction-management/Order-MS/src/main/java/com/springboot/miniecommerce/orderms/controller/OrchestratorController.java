@@ -1,6 +1,6 @@
 package com.springboot.miniecommerce.orderms.controller;
 
-import com.springboot.miniecommerce.commonutils.dto.ApiResponseDTO;
+import com.springboot.miniecommerce.commonutils.dto.ErrorDTO;
 import com.springboot.miniecommerce.orderms.model.Order;
 import com.springboot.miniecommerce.orderms.service.OrchestrateOrderService;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class OrchestratorController {
     }
 
     @PostMapping("/order")
-    public ResponseEntity<ApiResponseDTO<?>> createOrder(@RequestBody Order order) {
+    public ResponseEntity<?> createOrder(@RequestBody Order order) {
         //create order and send response
         return orchestrateOrderService.orchestrateOrderCreation(order);
     }

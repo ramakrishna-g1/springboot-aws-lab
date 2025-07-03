@@ -1,7 +1,7 @@
 package com.springboot.miniecommerce.inventoryms.service;
 
-import com.springboot.miniecommerce.commonutils.constant.InventoryUpdateStatus;
-import com.springboot.miniecommerce.commonutils.dto.ApiResponseDTO;
+import com.springboot.miniecommerce.commonutils.constant.InventoryEnum;
+import com.springboot.miniecommerce.commonutils.dto.ErrorDTO;
 import com.springboot.miniecommerce.commonutils.dto.InventoryRequestDTO;
 import com.springboot.miniecommerce.commonutils.dto.InventoryResponseDTO;
 import com.springboot.miniecommerce.inventoryms.model.Product;
@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,11 +27,28 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public ResponseEntity<ApiResponseDTO<?>> updateProductInventory(Long productId, InventoryRequestDTO inventoryRequestDTO) {
+
+    public ResponseEntity<?> addProducts(List<Product> products) {
+        if (products.isEmpty()) {
+            ErrorDTO apiResponse = new ErrorDTO(HttpStatus.BAD_REQUEST.value(), InventoryEnum.NO_PRODUCTS_SUPPLIED.toString(), "No products given to add", LocalDateTime.now().toString());
+            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        productRepository.saveAll(products);
+
+        return new ResponseEntity<>(InventoryEnum.PRODUCT_ADDED, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> updateProductInventory(Long productId, InventoryRequestDTO inventoryRequestDTO) {
 
         if (productId == null || productId == 0) {
-            ApiResponseDTO<Void> apiResponse = new ApiResponseDTO<>(InventoryUpdateStatus.FAILED.toString(), "Product inventory update failed");
-            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+            ErrorDTO errorResponse = new ErrorDTO(HttpStatus.BAD_REQUEST.value(), InventoryEnum.PRODUCT_ID_NULL.toString(), "ProductId is required for updating product inventory", LocalDateTime.now().toString());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        if (inventoryRequestDTO.getRequestedQuantity() == 0) {
+            ErrorDTO errorResponse = new ErrorDTO(HttpStatus.BAD_REQUEST.value(), InventoryEnum.PRODUCT_ID_NULL.toString(), "Quantity of product is required for updating product inventory", LocalDateTime.now().toString());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
         log.info("Get product with productId {}", productId);
@@ -38,40 +56,27 @@ public class ProductService {
 
         if (productOptional.isEmpty()) {
             log.error("No product found with id: {}", productId);
-
-            ApiResponseDTO<Void> apiResponse = new ApiResponseDTO<>(InventoryUpdateStatus.FAILED.toString(), "No such Product found");
-            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+            ErrorDTO apiResponse = new ErrorDTO(HttpStatus.NOT_FOUND.value(), InventoryEnum.PRODUCT_NOT_FOUND.toString(), ("Product with productId:" + productId + " not found"), LocalDateTime.now().toString());
+            return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
         }
+
         Product product = productOptional.get();
         log.info("Current available quantity for productId:{} is:{}", product.getProductId(), product.getAvailableQuantity());
 
-        if (product.getAvailableQuantity() < inventoryRequestDTO.getQuantity()) {
+        if (product.getAvailableQuantity() < inventoryRequestDTO.getRequestedQuantity()) {
             log.error("Order placed for more quantity than available");
-            ApiResponseDTO<Void> apiResponse = new ApiResponseDTO<>(InventoryUpdateStatus.FAILED.toString(), "Order placed for more quantity than available");
+            ErrorDTO apiResponse = new ErrorDTO(HttpStatus.BAD_REQUEST.value(), InventoryEnum.INSUFFICIENT_INVENTORY.toString(), "Order placed for more quantity than available", LocalDateTime.now().toString());
             return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
         }
-        product.setAvailableQuantity(product.getAvailableQuantity() - inventoryRequestDTO.getQuantity());
-        double orderPrice = product.getPrice() * inventoryRequestDTO.getQuantity();
+        //Update availableQuantity of product after order Completion
+        product.setAvailableQuantity(product.getAvailableQuantity() - inventoryRequestDTO.getRequestedQuantity());
+        double orderPrice = product.getPrice() * inventoryRequestDTO.getRequestedQuantity();
 
+        //TODO Use orderId came with request so that you can track the inventory updates
         productRepository.saveAndFlush(product);
 
         InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO(product.getProductId(), orderPrice);
-        ApiResponseDTO<InventoryResponseDTO> apiResponse =
-                new ApiResponseDTO<>(InventoryUpdateStatus.SUCCESS.toString(), "Product updated successfully", inventoryResponseDTO);
-
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        return new ResponseEntity<>(inventoryResponseDTO, HttpStatus.OK);
     }
 
-    public ResponseEntity<ApiResponseDTO<?>> addProducts(List<Product> products) {
-
-        if (products.isEmpty()) {
-            ApiResponseDTO<Void> apiresponse = new ApiResponseDTO<>("ERROR", "No products given to add");
-            return new ResponseEntity<>(apiresponse, HttpStatus.BAD_REQUEST);
-        }
-
-        productRepository.saveAll(products);
-
-        ApiResponseDTO<Void> apiresponse = new ApiResponseDTO<>("ADDED", "Products added successfully");
-        return new ResponseEntity<>(apiresponse, HttpStatus.OK);
-    }
 }

@@ -58,11 +58,16 @@ NOTE: Below things are assumed while making DTOs. 1 order= 1 product
 
 
 1. Client ---> order
-2. order  ---> client (Initiated)
+2. order ---> client (Initiated)
 3. order  ---> Inventory
 4. Inventory ---> Payment
 5. Payment ---> Order (update status)
 
 ### Improvements that can be done-
-1. Converting to Event based Architecture
+1. Converting to Event-based Architecture
 2. One order can have multiple Products
+3. Ensure Idempotency of the endpoints
+4. Suggest the User if stock is less than what quantity he wants. i.e. user wants 10 Apples but you have 5 only
+
+### Things considered while Building application-
+1.  

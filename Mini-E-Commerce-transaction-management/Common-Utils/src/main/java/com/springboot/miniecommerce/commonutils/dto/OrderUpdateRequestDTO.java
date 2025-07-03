@@ -1,11 +1,13 @@
 package com.springboot.miniecommerce.commonutils.dto;
 
+import com.springboot.miniecommerce.commonutils.constant.ModificationReason;
 import com.springboot.miniecommerce.commonutils.constant.OrderStatus;
 
 public class OrderUpdateRequestDTO {
 
     private Long orderId;
     private OrderStatus orderStatus;
+    private ModificationReason modificationReason;
 
     public Long getOrderId() {
         return orderId;
@@ -23,9 +25,18 @@ public class OrderUpdateRequestDTO {
         this.orderStatus = orderStatus;
     }
 
-    public OrderUpdateRequestDTO(Long orderId, OrderStatus orderStatus) {
+    public ModificationReason getModificationReason() {
+        return modificationReason;
+    }
+
+    public void setModificationReason(ModificationReason modificationReason) {
+        this.modificationReason = modificationReason;
+    }
+
+    public OrderUpdateRequestDTO(Long orderId, OrderStatus orderStatus, ModificationReason modificationReason) {
         this.orderId = orderId;
         this.orderStatus = orderStatus;
+        this.modificationReason = modificationReason;
     }
 
     @Override
@@ -33,6 +44,7 @@ public class OrderUpdateRequestDTO {
         return "OrderUpdateRequestDTO{" +
                 "orderId=" + orderId +
                 ", orderStatus=" + orderStatus +
+                ", modificationReason=" + modificationReason +
                 '}';
     }
 }

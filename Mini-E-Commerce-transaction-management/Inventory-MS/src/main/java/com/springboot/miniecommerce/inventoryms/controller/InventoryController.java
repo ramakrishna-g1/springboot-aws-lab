@@ -1,6 +1,6 @@
 package com.springboot.miniecommerce.inventoryms.controller;
 
-import com.springboot.miniecommerce.commonutils.dto.ApiResponseDTO;
+import com.springboot.miniecommerce.commonutils.dto.ErrorDTO;
 import com.springboot.miniecommerce.commonutils.dto.InventoryRequestDTO;
 import com.springboot.miniecommerce.inventoryms.model.Product;
 import com.springboot.miniecommerce.inventoryms.service.ProductService;
@@ -20,12 +20,12 @@ public class InventoryController {
     }
 
     @PostMapping("/product")
-    public ResponseEntity<ApiResponseDTO<?>> addProducts(@RequestBody List<Product> products) {
+    public ResponseEntity<?> addProducts(@RequestBody List<Product> products) {
         return productService.addProducts(products);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponseDTO<?>> updateInventory(@PathVariable("id") Long productId, @RequestBody InventoryRequestDTO inventoryRequestDTO){
+    public ResponseEntity<?> updateInventory(@PathVariable("id") Long productId, @RequestBody InventoryRequestDTO inventoryRequestDTO){
         return productService.updateProductInventory(productId, inventoryRequestDTO);
     }
 }

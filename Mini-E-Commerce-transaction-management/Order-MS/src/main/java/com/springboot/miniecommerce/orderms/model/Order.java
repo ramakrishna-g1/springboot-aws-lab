@@ -26,6 +26,9 @@ public class Order{
     @Column
     private Integer quantity;
 
+    @Column
+    private String modificationReason;
+
     @Column(nullable = false, updatable = false)
     @CreatedDate
     private Timestamp createdDate;
@@ -66,6 +69,14 @@ public class Order{
         this.quantity = quantity;
     }
 
+    public String getModificationReason() {
+        return modificationReason;
+    }
+
+    public void setModificationReason(String modificationReason) {
+        this.modificationReason = modificationReason;
+    }
+
     public Timestamp getCreatedDate() {
         return createdDate;
     }
@@ -82,7 +93,6 @@ public class Order{
         this.lastModifiedDate = lastModifiedDate;
     }
 
-
     @Override
     public String toString() {
         return "Order{" +
@@ -90,6 +100,7 @@ public class Order{
                 ", orderStatus='" + orderStatus + '\'' +
                 ", productId=" + productId +
                 ", quantity=" + quantity +
+                ", modificationReason='" + modificationReason + '\'' +
                 ", createdDate=" + createdDate +
                 ", lastModifiedDate=" + lastModifiedDate +
                 '}';
