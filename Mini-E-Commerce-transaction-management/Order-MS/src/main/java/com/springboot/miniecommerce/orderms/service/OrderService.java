@@ -1,9 +1,9 @@
 package com.springboot.miniecommerce.orderms.service;
 
+import com.springboot.miniecommerce.commonutils.constant.OrderStatus;
 import com.springboot.miniecommerce.commonutils.dto.ApiResponseDTO;
 import com.springboot.miniecommerce.commonutils.dto.OrderResponseDTO;
 import com.springboot.miniecommerce.commonutils.dto.OrderUpdateRequestDTO;
-import com.springboot.miniecommerce.commonutils.constant.OrderStatus;
 import com.springboot.miniecommerce.orderms.model.Order;
 import com.springboot.miniecommerce.orderms.repository.OrderRepository;
 import org.slf4j.Logger;
