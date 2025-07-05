@@ -2,38 +2,38 @@ package com.springboot.miniecommerce.commonutils.dto;
 
 public class OrderResponseDTO {
 
-    private Long orderId;
-    private Long productId;
-    private Integer quantity;
+    private long orderId;
+    private long productId;
+    private int quantity;
 
-    public Long getOrderId() {
+    public long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(Long orderId) {
+    public void setOrderId(long orderId) {
         this.orderId = orderId;
     }
 
-    public Long getProductId() {
+    public long getProductId() {
         return productId;
     }
 
-    public void setProductId(Long productId) {
+    public void setProductId(long productId) {
         this.productId = productId;
     }
 
-    public Integer getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
 
     public OrderResponseDTO() {
     }
 
-    public OrderResponseDTO(Long orderId, Long productId, Integer quantity) {
+    public OrderResponseDTO(long orderId, long productId, int quantity) {
         this.orderId = orderId;
         this.productId = productId;
         this.quantity = quantity;

@@ -2,29 +2,29 @@ package com.springboot.miniecommerce.commonutils.dto;
 
 public class PaymentResponseDTO {
 
-    private Long paymentId;
-    private Double totalAmount;
+    private long paymentId;
+    private double totalAmount;
 
-    public Long getPaymentId() {
+    public long getPaymentId() {
         return paymentId;
     }
 
-    public void setPaymentId(Long paymentId) {
+    public void setPaymentId(long paymentId) {
         this.paymentId = paymentId;
     }
 
-    public Double getTotalAmount() {
+    public double getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(Double totalAmount) {
+    public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
     }
 
     public PaymentResponseDTO() {
     }
 
-    public PaymentResponseDTO(Long paymentId, Double totalAmount) {
+    public PaymentResponseDTO(long paymentId, double totalAmount) {
         this.paymentId = paymentId;
         this.totalAmount = totalAmount;
     }

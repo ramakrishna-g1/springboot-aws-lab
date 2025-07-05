@@ -1,28 +1,28 @@
 package com.springboot.miniecommerce.commonutils.dto;
 
 import com.springboot.miniecommerce.commonutils.constant.ModificationReason;
-import com.springboot.miniecommerce.commonutils.constant.OrderStatus;
+import com.springboot.miniecommerce.commonutils.constant.OrderEnum;
 
 public class OrderUpdateRequestDTO {
 
-    private Long orderId;
-    private OrderStatus orderStatus;
+    private long orderId;
+    private OrderEnum orderEnum;
     private ModificationReason modificationReason;
 
-    public Long getOrderId() {
+    public long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(Long orderId) {
+    public void setOrderId(long orderId) {
         this.orderId = orderId;
     }
 
-    public OrderStatus getOrderStatus() {
-        return orderStatus;
+    public OrderEnum getOrderStatus() {
+        return orderEnum;
     }
 
-    public void setOrderStatus(OrderStatus orderStatus) {
-        this.orderStatus = orderStatus;
+    public void setOrderStatus(OrderEnum orderEnum) {
+        this.orderEnum = orderEnum;
     }
 
     public ModificationReason getModificationReason() {
@@ -33,9 +33,9 @@ public class OrderUpdateRequestDTO {
         this.modificationReason = modificationReason;
     }
 
-    public OrderUpdateRequestDTO(Long orderId, OrderStatus orderStatus, ModificationReason modificationReason) {
+    public OrderUpdateRequestDTO(long orderId, OrderEnum orderEnum, ModificationReason modificationReason) {
         this.orderId = orderId;
-        this.orderStatus = orderStatus;
+        this.orderEnum = orderEnum;
         this.modificationReason = modificationReason;
     }
 
@@ -43,7 +43,7 @@ public class OrderUpdateRequestDTO {
     public String toString() {
         return "OrderUpdateRequestDTO{" +
                 "orderId=" + orderId +
-                ", orderStatus=" + orderStatus +
+                ", orderEnum=" + orderEnum +
                 ", modificationReason=" + modificationReason +
                 '}';
     }

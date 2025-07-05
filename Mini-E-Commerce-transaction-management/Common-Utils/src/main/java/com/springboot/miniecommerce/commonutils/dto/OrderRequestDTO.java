@@ -2,20 +2,10 @@ package com.springboot.miniecommerce.commonutils.dto;
 
 import com.springboot.miniecommerce.commonutils.constant.ModificationReason;
 
-public class InventoryRequestDTO {
-
-    private long orderId;
+public class OrderRequestDTO {
     private long productId;
-    private int productQuantity;
+    private int quantity;
     private ModificationReason modificationReason;
-
-    public long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(long orderId) {
-        this.orderId = orderId;
-    }
 
     public long getProductId() {
         return productId;
@@ -25,12 +15,12 @@ public class InventoryRequestDTO {
         this.productId = productId;
     }
 
-    public int getProductQuantity() {
-        return productQuantity;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setProductQuantity(int productQuantity) {
-        this.productQuantity = productQuantity;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public ModificationReason getModificationReason() {
@@ -41,19 +31,17 @@ public class InventoryRequestDTO {
         this.modificationReason = modificationReason;
     }
 
-    public InventoryRequestDTO(long orderId, long productId, int productQuantity, ModificationReason modificationReason) {
-        this.orderId = orderId;
+    public OrderRequestDTO(long productId, int quantity, ModificationReason modificationReason) {
         this.productId = productId;
-        this.productQuantity = productQuantity;
+        this.quantity = quantity;
         this.modificationReason = modificationReason;
     }
 
     @Override
     public String toString() {
-        return "InventoryRequestDTO{" +
-                "orderId=" + orderId +
-                ", productId=" + productId +
-                ", requestedQuantity=" + productQuantity +
+        return "OrderRequestDTO{" +
+                "productId=" + productId +
+                ", quantity=" + quantity +
                 ", modificationReason=" + modificationReason +
                 '}';
     }

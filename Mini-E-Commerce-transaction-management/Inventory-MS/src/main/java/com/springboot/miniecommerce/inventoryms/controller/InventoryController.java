@@ -25,7 +25,13 @@ public class InventoryController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> updateInventory(@PathVariable("id") Long productId, @RequestBody InventoryRequestDTO inventoryRequestDTO){
+    public ResponseEntity<?> updateInventory(@PathVariable("id") long productId, @RequestBody InventoryRequestDTO inventoryRequestDTO){
         return productService.updateProductInventory(productId, inventoryRequestDTO);
     }
+
+    @PatchMapping("/{id}/revert")
+    public ResponseEntity<?> revertInventoryUpdate(@PathVariable("id") long productId, @RequestBody InventoryRequestDTO inventoryRequestDTO){
+        return productService.revertInventoryUpdate(productId, inventoryRequestDTO);
+    }
+
 }

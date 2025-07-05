@@ -47,27 +47,13 @@ NOTE: Below things are assumed while making DTOs. 1 order= 1 product
     | POST    | `/api/payment`                     | Initiate payment                          |
     | POST    | `/api/payment/{id}/refund`         | Initiate payment refund                   |
 
-
-
-
-
-1. Client---> order
-2. order ---> Inventory
-3. order ---> Payment
-4. order ---> client (Response failed or success)
-
-
-1. Client ---> order
-2. order ---> client (Initiated)
-3. order  ---> Inventory
-4. Inventory ---> Payment
-5. Payment ---> Order (update status)
-
 ### Improvements that can be done-
 1. Converting to Event-based Architecture
 2. One order can have multiple Products
-3. Ensure Idempotency of the endpoints
-4. Suggest the User if stock is less than what quantity he wants. i.e. user wants 10 Apples but you have 5 only
+3. Introduce retry mechanisms for certain cases
+4. Ensure Idempotency of the endpoints
+5. Suggest the User if stock is less than what quantity he wants i.e., user wants 10 Apples, but you have 5 only
+6. Audit table in Inventory MS to track change in inventory (Track orderId and modificationReason)
 
 ### Things considered while Building application-
 1.  

@@ -2,26 +2,26 @@ package com.springboot.miniecommerce.commonutils.dto;
 
 public class PaymentRequestDTO {
 
-    private Long orderId;
-    private Double amount;
+    private long orderId;
+    private double amount;
 
-    public Long getOrderId() {
+    public long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(Long orderId) {
+    public void setOrderId(long orderId) {
         this.orderId = orderId;
     }
 
-    public Double getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 
-    public PaymentRequestDTO(Long orderId, Double amount) {
+    public PaymentRequestDTO(long orderId, double amount) {
         this.orderId = orderId;
         this.amount = amount;
     }

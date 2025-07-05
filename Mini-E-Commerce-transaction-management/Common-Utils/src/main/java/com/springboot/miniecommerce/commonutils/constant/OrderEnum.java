@@ -1,15 +1,20 @@
 package com.springboot.miniecommerce.commonutils.constant;
 
-public enum OrderStatus {
+public enum OrderEnum {
+    //Below are statuses of Order
     INITIATED("INITIATED"),
     CONFIRMED("CONFIRMED"),
     FAILED("FAILED"),
     CANCELLED("CANCELLED"),
-    UPDATED("UPDATED");
+
+    //Below are API response codes
+    UPDATED("UPDATED"),
+    PRODUCT_ID_NULL("PRODUCT_ID_NULL"),
+    INVALID_QUANTITY("INVALID_QUANTITY"),;
 
     private final String text;
 
-    OrderStatus(final String text) {
+    OrderEnum(final String text) {
         this.text = text;
     }
 
