@@ -54,9 +54,10 @@ This design choice helped us explore real-world challenges in microservice commu
    | POST   | `/api/orchestrator/order`  | Create an order. **Body:** `{}`                         |
    | GET    | `/api/order/{id}`          | Get details of an order                                 |
    | PATCH  | `/api/order/{id}/cancel`   | For user to cancel the order                            |
-   **NOTE**: Below things are assumed while making DTOs(To keep project as simple as possible).
-   a. 1 Order = 1 Product.
-   b. Orchestrator is inside Order-MS.
+   
+   **NOTE**: Below things are assumed while making DTOs(To keep project as simple as possible).  
+   1. 1 Order = 1 Product.
+   2. Orchestrator is inside Order-MS.
 
 2. [Inventory Microservice](Inventory-MS)- Inventory management microservice
    ### Inventory Service API Endpoints
@@ -83,4 +84,4 @@ This design choice helped us explore real-world challenges in microservice commu
 4. Ensure Idempotency of the endpoints by sending and tracking things like UUID with each request.
 5. Audit table in Inventory MS to track change in inventory (Track orderId, quantity, and modificationReason)
 6. One order can have multiple Products
-7. Suggest the User if stock is less than what quantity he wants i.e., user wants 10 Apples, but you have 5 only
+7. Suggest the User if stock is less than what quantity he wants i.e., user wants 10 Apples, but we have 5 only
