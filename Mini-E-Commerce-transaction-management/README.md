@@ -50,7 +50,7 @@ This design choice helped us explore real-world challenges in microservice commu
 1. [Order Microservice](Order-MS)- Order management microservice
    ### Order Service API Endpoints
    | Method | Endpoint                   | Description                                             |
-       |:-------|:---------------------------|:--------------------------------------------------------|
+   |:-------|:---------------------------|:--------------------------------------------------------|
    | POST   | `/api/orchestrator/order`  | Create an order. **Body:** `{}`                         |
    | GET    | `/api/order/{id}`          | Get details of an order                                 |
    | PATCH  | `/api/order/{id}/cancel`   | For user to cancel the order                            |
@@ -61,7 +61,7 @@ This design choice helped us explore real-world challenges in microservice commu
 2. [Inventory Microservice](Inventory-MS)- Inventory management microservice
    ### Inventory Service API Endpoints
    | Method | Endpoint                     | Description                       |
-       |:-------|:-----------------------------|:----------------------------------|
+   |:-------|:-----------------------------|:----------------------------------|
    | GET    | `/api/inventory/{id}`        | Get inventory status of a product |
    | POST   | `/api/inventory/products`    | Add new products                  |
    | PATCH  | `/api/inventory/{id}`        | Update inventory stock status     |
@@ -70,7 +70,7 @@ This design choice helped us explore real-world challenges in microservice commu
 3. [Payment Microservice](Payment-MS)- Payment management microservice
    ### Payment Service API Endpoints
    | Method  | Endpoint                           | Description                               |
-       |:--------|:-----------------------------------|:------------------------------------------|
+   |:--------|:-----------------------------------|:------------------------------------------|
    | POST    | `/api/payment`                     | Initiate payment                          |
    | GET     | `/api/payment/{id}`                | Get payment details using payment ID      |
    | POST    | `/api/payment/{id}/refund`         | Initiate payment refund                   |
