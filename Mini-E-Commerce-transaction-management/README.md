@@ -49,13 +49,13 @@ This design choice helped us explore real-world challenges in microservice commu
 
 1. [Order Microservice](Order-MS)- Order management microservice
    ### Order Service API Endpoints
-   | Method | Endpoint                   | Description                                             |
-   |:-------|:---------------------------|:--------------------------------------------------------|
-   | POST   | `/api/orchestrator/order`  | Create an order. **Body:** `{}`                         |
-   | GET    | `/api/order/{id}`          | Get details of an order                                 |
-   | PATCH  | `/api/order/{id}/cancel`   | For user to cancel the order                            |
+   | Method | Endpoint                   | Description                                            |
+   |:-------|:---------------------------|:-------------------------------------------------------|
+   | POST   | `/api/orchestrator/order`  | Create an order.                                       |
+   | GET    | `/api/order/{id}`          | Get details of an order                                |
+   | PATCH  | `/api/order/{id}/cancel`   | For user to cancel the order                           |
    
-   **NOTE**: Below things are assumed while making DTOs(To keep project as simple as possible).  
+   **NOTE**: Below things are assumed while making Order MS(To keep project as simple as possible).  
    1. 1 Order = 1 Product.
    2. Orchestrator is inside Order-MS.
 
