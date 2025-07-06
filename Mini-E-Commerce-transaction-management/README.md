@@ -43,7 +43,7 @@ This design choice helped us explore real-world challenges in microservice commu
 
 ## Sequence diagram
 
-![Mini-ecommerce-sequence-diag.png](Mini-ecommerce-sequence-diag.png)
+![Mini-ecommerce-sequence-diagram.png](Mini-ecommerce-sequence-diagram.png)
 
 ## API Contract
 
