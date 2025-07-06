@@ -105,7 +105,7 @@ public class OrchestrateOrderService {
                         log.info("Order status for orderId:{} updated to:{}", orderResponseDTO.getOrderId(), OrderEnum.CONFIRMED);
                         return new ResponseEntity<>(orderResponseDTO, HttpStatus.OK);
                     } else {
-                        //TODO Retry order updation
+                        //TODO Retry order update
                         log.error("status code:{} received while updating order status to CONFIRMED, error info:{}", orderUpdateResponse.getStatusCode(), orderUpdateResponse.getBody());
                     }
                 } else {

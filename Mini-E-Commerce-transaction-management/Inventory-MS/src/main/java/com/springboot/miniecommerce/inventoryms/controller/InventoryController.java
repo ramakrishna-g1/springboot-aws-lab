@@ -19,7 +19,7 @@ public class InventoryController {
         this.productService = productService;
     }
 
-    @PostMapping("/product")
+    @PostMapping("/products")
     public ResponseEntity<?> addProducts(@RequestBody List<Product> products) {
         return productService.addProducts(products);
     }
