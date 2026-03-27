@@ -1,0 +1,22 @@
+server:
+    port: 9093
+
+spring:
+  application:
+    name: "Mini-E-Commerce-Payment-MS"
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payment-ms
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+        ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+  data:
+    jdbc:
+      dialect: postgresql
